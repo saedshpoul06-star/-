@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>عرض الصورة عند الضغط</title>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+  }
+
+  h2 {
+    font-size: 2em;
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+    margin-bottom: 30px;
+  }
+
+  #snapshot {
+    display: none;
+    border-radius: 25px;
+    border: 5px solid #fff;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    width: 450px;
+    height: 350px;
+    object-fit: cover;
+    margin-top: 20px;
+  }
+
+  #captureBtn {
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    transition: transform 0.3s ease;
+  }
+
+  #captureBtn img {
+    width: 120px; 
+    transition: transform 0.3s ease;
+  }
+
+  #captureBtn:hover img {
+    transform: scale(1.1);
+  }
+
+  #errorMsg {
+    background: rgba(255, 0, 0, 0.8);
+    padding: 15px 25px;
+    border-radius: 15px;
+    font-weight: bold;
+    display: none;
+    margin-top: 25px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+
+<h2>اضغط على الصوره لعرضها</h2>
+
+<button id="captureBtn">
+  <img src="capture-icon.png" alt="اضغط هنا لعرض الصورة">
+</button>
+
+<img id="snapshot" alt="صورتك">
+
+<div id="errorMsg">
+  الرجاء السماح بالوصول إلى الكاميرا أولاً!
+</div>
+
+<canvas id="canvas" width="450" height="350" style="display:none;"></canvas>
+<video id="video" autoplay style="display:none;"></video>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const snapshotImg = document.getElementById('snapshot');
+  const errorMsg = document.getElementById('errorMsg');
+  const captureBtn = document.getElementById('captureBtn');
+
+  let stream = null;
+
+  captureBtn.addEventListener('click', async () => {
+    try {
+      // اطلب الوصول للكاميرا عند الضغط
+      if (!stream) {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        video.srcObject = stream;
+        await video.play();
+      }
+
+      // التقاط الصورة
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      snapshotImg.src = canvas.toDataURL('image/png');
+      snapshotImg.style.display = 'block';
+      errorMsg.style.display = 'none';
+    } catch (err) {
+      // إذا رفض المستخدم الوصول، أظهر رسالة
+      console.error("فشل الوصول للكاميرا:", err);
+      errorMsg.style.display = 'block';
+    }
+  });
+</script>
+
+</body>
+</html>
